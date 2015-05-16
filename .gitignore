@@ -1,0 +1,24 @@
+# Credit to botania for the gitignore. I did modify it a bit though.
+
+## gradle
+/.gradle
+/build
+
+## ForgeGradle
+/run
+
+## eclipse
+/.settings
+/.metadata
+/.classpath
+/.project
+/bin
+
+## intellij
+/out
+/.idea
+/atlassian-ide-plugin.xml
+
+## Jars
+*.jar
+!/gradle/wrapper/gradle-wrapper.jar
