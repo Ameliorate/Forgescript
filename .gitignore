@@ -13,7 +13,10 @@
 /.classpath
 /.project
 /bin
-/eclipse
+/eclipse/mods/
+/eclipse/config/
+/eclipse/crash-reports/
+/eclipse/logs/
 
 ## intellij
 /out
