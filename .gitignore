@@ -1,28 +1,25 @@
-# Credit to botania for the gitignore. I did modify it a bit though.
+# This time stolen from opencomputers.
 
-## gradle
+# Gradle
 /.gradle
 /build
 
-## ForgeGradle
-/run
-
-## eclipse
-/.settings
-/.metadata
+# Eclipse
 /.classpath
 /.project
+/.settings
 /bin
-/eclipse/mods/
-/eclipse/config/
-/eclipse/crash-reports/
-/eclipse/logs/
 
-## intellij
-/out
+# IntelliJ IDEA
+/*.iml
+/*.ipr
+/*.iws
 /.idea
-/atlassian-ide-plugin.xml
+/out
 
-## Jars
-*.jar
-!/gradle/wrapper/gradle-wrapper.jar
+# Debugging
+/eclipse
+/run
+
+# OS X
+.DS_Store
