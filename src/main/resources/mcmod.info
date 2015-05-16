@@ -1,0 +1,16 @@
+[
+{
+  "modid": "forgescript",
+  "name": "Forgescript",
+  "description": "A javascript API for Minecraft Forge.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Amelorate"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
