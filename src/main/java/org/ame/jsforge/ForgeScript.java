@@ -28,8 +28,8 @@ public class ForgeScript {
 	public static final String VERSION = "0.0";
 	public static final int API_VERSION = 0;
 
-	private static ScriptEngine engine;
-	private static ArrayList<ScriptContext> modContexts = new ArrayList<>();
+	public static ScriptEngine engine;
+	private static ArrayList<JSMod> modContexts = new ArrayList<>();
 
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) throws ScriptException {
@@ -54,6 +54,35 @@ public class ForgeScript {
 			invokeAll("postInit", true, event);
 		}
 		catch (NoSuchMethodException ignored) {}
+	}
+
+	/**
+	 * Invoke a method on every mod.
+	 */
+	public void invokeAll(String function, boolean ignoreNoSuchMethodExceptions, Object... args) throws ScriptException, NoSuchMethodException {
+		for (JSMod mod : modContexts) {
+			engine.setContext(mod.context);
+			try {
+				((Invocable) engine).invokeFunction(function, args);
+			}
+			catch (NoSuchMethodException e) {
+				if (!ignoreNoSuchMethodExceptions) {
+					throw e;
+				}
+			}
+		}
+	}
+
+	public void invoke(String function, int id, boolean ignoreNoSuchMethodExceptions, Object... args) throws ScriptException, NoSuchMethodException {
+		engine.setContext(modContexts.get(id).context);
+		try {
+			((Invocable) engine).invokeFunction(function, args);
+		}
+		catch (NoSuchMethodException e) {
+			if (!ignoreNoSuchMethodExceptions) {
+				throw e;
+			}
+		}
 	}
 
 	private void loadAllJSMods() throws ScriptException {
@@ -103,13 +132,16 @@ public class ForgeScript {
 		catch (IOException | URISyntaxException e) {
 			throw new AssertionError(e);
 		}
+		JsonObject modInfo = null;
 		Enumeration<? extends ZipEntry> zipEntries = zipFile.entries();
 		while (zipEntries.hasMoreElements()) {
 			ZipEntry entry = zipEntries.nextElement();
 			System.out.println(entry.getName());
-			if (entry.getName().startsWith("src") && !entry.isDirectory()) {
+			if (entry.getName().startsWith("src") && entry.getName().endsWith(".js") && !entry.isDirectory()) {
 				engine = new ScriptEngineManager().getEngineByName("nashorn");	// I probably need a better way to reset the context.
 				InputStreamReader api = new InputStreamReader(this.getClass().getResourceAsStream("/api/main.js"));
+				System.out.println(api + " API");
+				System.out.println(engine + " engine");
 				engine.eval(api);
 				engine.eval("var apiVersion = " + API_VERSION + ";");
 				try {
@@ -118,27 +150,20 @@ public class ForgeScript {
 				catch (IOException e) {
 					throw new AssertionError(e);
 				}
-				ScriptContext context = engine.getContext();
-				modContexts.add(context);
-				engine.eval("var modID = " + modContexts.indexOf(context) + ";");
 			}
-		}
-	}
-
-	/**
-	 * Invoke a method on every mod.
-	 */
-	private void invokeAll(String function, boolean ignoreNoSuchMethodExceptions, Object... args) throws ScriptException, NoSuchMethodException {
-		for (ScriptContext context : modContexts) {
-			engine.setContext(context);
-			try {
-				((Invocable) engine).invokeFunction(function, args);
-			}
-			catch (NoSuchMethodException e) {
-				if (!ignoreNoSuchMethodExceptions) {
-					throw e;
+			else if (entry.getName().endsWith(".json") && !entry.isDirectory()) {
+				try {
+					modInfo = (JsonObject) new JsonParser().parse(new InputStreamReader(zipFile.getInputStream(entry)));
+				}
+				catch (IOException e) {
+					throw new AssertionError(e);
 				}
 			}
 		}
+		assert modInfo != null;	// Silences idea warning.
+		JSMod mod = new JSMod(engine.getContext(), 0, path, modInfo.get("API_Version").getAsInt(), modInfo.get("Mod_Name").getAsString(), modInfo.get("Mod_Version").getAsString());
+		modContexts.add(mod);
+		engine.eval("var modID = " + modContexts.indexOf(mod) + ";");
+		mod.modID = modContexts.indexOf(mod);
 	}
 }
