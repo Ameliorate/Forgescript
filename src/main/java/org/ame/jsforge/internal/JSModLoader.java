@@ -1,14 +1,15 @@
-package org.ame.jsforge;
+package org.ame.jsforge.internal;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
-import javax.script.*;
-import java.io.*;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -20,56 +21,30 @@ import java.util.zip.ZipFile;
 
 /**
  * @author Amelorate
- * The main class for ForgeScript. Ducttapes everything together.
+ * Loads mods from the classpath.
  */
-@Mod(modid = ForgeScript.MODID, version = ForgeScript.VERSION)
-public class ForgeScript {
-	public static final String MODID = "forgescript";
-	public static final String VERSION = "0.0";
-	public static final int API_VERSION = 0;
+public class JSModLoader {
+	public static JSModLoader instance;
 
-	public static ScriptEngine engine;
-	private static ArrayList<JSMod> jsMods = new ArrayList<>();
+	public ScriptEngine engine;
 
-	@Mod.EventHandler
-	public void preInit(FMLPreInitializationEvent event) throws ScriptException {
-		loadAllJSMods();
-		try {
-			invokeAll("preInit", true, event);
+	private ArrayList<JSMod> jsMods = new ArrayList<>();
+	private boolean alreadyLoadedMods = false;
+
+	public static JSModLoader getInstance() {
+		if (instance != null) {
+			return instance;
 		}
-		catch (NoSuchMethodException ignored) {}
-	}
-
-	@Mod.EventHandler
-	public void init(FMLInitializationEvent event) throws ScriptException{
-		try {
-			invokeAll("init", true, event);
-		}
-		catch (NoSuchMethodException ignored) {}
-	}
-
-	@Mod.EventHandler
-	public void postInit(FMLPostInitializationEvent event) throws ScriptException{
-		try {
-			invokeAll("postInit", true, event);
-		}
-		catch (NoSuchMethodException ignored) {}
-	}
-
-	/**
-	 * Invoke a method on every mod.
-	 */
-	public void invokeAll(String invoking, boolean ignoreNoSuchMethodExceptions, Object... args) throws ScriptException, NoSuchMethodException {
-		for (JSMod mod : jsMods) {
-			mod.invoke(invoking, ignoreNoSuchMethodExceptions, args);
+		else {
+			instance = new JSModLoader();
+			return instance;
 		}
 	}
 
-	public void invoke(String invoking, int id, boolean ignoreNoSuchMethodExceptions, Object... args) throws ScriptException, NoSuchMethodException {
-		jsMods.get(id).invoke(invoking, ignoreNoSuchMethodExceptions, args);
-	}
-
-	private void loadAllJSMods() throws ScriptException {
+	public void loadAllJSMods() throws ScriptException {
+		if (alreadyLoadedMods) {
+			throw new IllegalArgumentException("All the mods have already been loaded.");
+		}
 		ClassLoader classLoader = this.getClass().getClassLoader();
 		URL[] classPath = ((URLClassLoader)classLoader).getURLs();
 		for(URL url: classPath) {
@@ -82,9 +57,10 @@ public class ForgeScript {
 				}
 			}
 		}
+		alreadyLoadedMods = true;
 	}
 
-	private boolean isValidModFile(URL path) {
+	public boolean isValidModFile(URL path) {
 		try {
 			File file = new File(path.toURI());
 			ZipFile modZipFile = new ZipFile(file);
@@ -93,7 +69,7 @@ public class ForgeScript {
 			JsonParser jsonParser = new JsonParser();
 			JsonObject modInfoJson = (JsonObject) jsonParser.parse(new InputStreamReader(modInfoStream));
 
-			if (modInfoJson.get("API_Version").getAsInt() < API_VERSION) {
+			if (modInfoJson.get("API_Version").getAsInt() < ForgeScript.API_VERSION) {
 				System.out.println("Bad Version");
 				return false;
 			}
@@ -108,7 +84,7 @@ public class ForgeScript {
 		}
 	}
 
-	private void loadMod(URL path) throws ScriptException {
+	public void loadMod(URL path) throws ScriptException {
 		ZipFile zipFile;
 		try {
 			zipFile = new ZipFile(new File(path.toURI()));
@@ -127,7 +103,7 @@ public class ForgeScript {
 				System.out.println(api + " API");
 				System.out.println(engine + " engine");
 				engine.eval(api);
-				engine.eval("var apiVersion = " + API_VERSION + ";");
+				engine.eval("var apiVersion = " + ForgeScript.API_VERSION + ";");
 				try {
 					engine.eval(new InputStreamReader(zipFile.getInputStream(entry)));
 				}

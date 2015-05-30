@@ -1,4 +1,6 @@
-package org.ame.jsforge;
+package org.ame.jsforge.internal;
+
+import org.ame.jsforge.internal.ForgeScript;
 
 import javax.script.Invocable;
 import javax.script.ScriptContext;
@@ -26,15 +28,19 @@ public class JSMod {
 	public String name;
 	public String modVersion;
 
-	public void invoke(String invoking, boolean ignoreNoSuchMethodExceptions, Object... args) throws NoSuchMethodException, ScriptException{
+	public Object invoke(String invoking, boolean ignoreNoSuchMethodExceptions, Object... args) throws NoSuchMethodException, ScriptException{
 		ForgeScript.engine.setContext(context);
 		try {
-			((Invocable) ForgeScript.engine).invokeFunction(invoking, args);
+			return ((Invocable) ForgeScript.engine).invokeFunction(invoking, args);
 		}
 		catch (NoSuchMethodException e) {
 			if (!ignoreNoSuchMethodExceptions) {
 				throw e;
 			}
+			else {
+				return null;
+			}
 		}
+
 	}
 }

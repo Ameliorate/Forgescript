@@ -1,5 +1,7 @@
 package org.ame.jsforge;
 
+import org.ame.jsforge.internal.JSMod;
+
 import java.util.HashMap;
 
 /**
