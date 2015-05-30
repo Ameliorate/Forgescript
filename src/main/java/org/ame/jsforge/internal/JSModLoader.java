@@ -6,15 +6,13 @@ import com.google.gson.JsonParser;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -28,7 +26,7 @@ public class JSModLoader {
 
 	public ScriptEngine engine;
 
-	private ArrayList<JSMod> jsMods = new ArrayList<>();
+	public ArrayList<JSMod> jsMods = new ArrayList<>();
 	private boolean alreadyLoadedMods = false;
 
 	public static JSModLoader getInstance() {
@@ -85,6 +83,11 @@ public class JSModLoader {
 	}
 
 	public void loadMod(URL path) throws ScriptException {
+		engine = new ScriptEngineManager().getEngineByName("nashorn");	// I probably need a better way to reset the context.
+		Reader api = JSDependencyResolver.getInstance().resolveToReader("main");
+		engine.eval(api);
+		engine.eval("var apiVersion = " + ForgeScript.API_VERSION + ";");
+
 		ZipFile zipFile;
 		try {
 			zipFile = new ZipFile(new File(path.toURI()));
@@ -94,22 +97,12 @@ public class JSModLoader {
 		}
 		JsonObject modInfo = null;
 		Enumeration<? extends ZipEntry> zipEntries = zipFile.entries();
+		HashSet<ZipEntry> jsFiles = new HashSet<>();
 		while (zipEntries.hasMoreElements()) {
 			ZipEntry entry = zipEntries.nextElement();
 			System.out.println(entry.getName());
 			if (entry.getName().startsWith("src") && entry.getName().endsWith(".js") && !entry.isDirectory()) {
-				engine = new ScriptEngineManager().getEngineByName("nashorn");	// I probably need a better way to reset the context.
-				InputStreamReader api = new InputStreamReader(this.getClass().getResourceAsStream("/api/main.js"));
-				System.out.println(api + " API");
-				System.out.println(engine + " engine");
-				engine.eval(api);
-				engine.eval("var apiVersion = " + ForgeScript.API_VERSION + ";");
-				try {
-					engine.eval(new InputStreamReader(zipFile.getInputStream(entry)));
-				}
-				catch (IOException e) {
-					throw new AssertionError(e);
-				}
+				jsFiles.add(entry);
 			}
 			else if (entry.getName().endsWith(".json") && !entry.isDirectory()) {
 				try {
@@ -125,5 +118,15 @@ public class JSModLoader {
 		jsMods.add(mod);
 		engine.eval("var modID = " + jsMods.indexOf(mod) + ";");
 		mod.modID = jsMods.indexOf(mod);
+		JSDependencyResolver.getInstance().resolveAll(mod, modInfo);
+
+		for (ZipEntry jsFile : jsFiles) {
+			try {
+				engine.eval(new InputStreamReader(zipFile.getInputStream(jsFile)));
+			}
+			catch (IOException e) {
+				throw new AssertionError(e);
+			}
+		}
 	}
 }

@@ -19,9 +19,6 @@ public class ForgeScript {
 	public static final String VERSION = "0.0";
 	public static final int API_VERSION = 0;
 
-	public static ScriptEngine engine;
-	private static ArrayList<JSMod> jsMods = new ArrayList<>();
-
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) throws ScriptException {
 		JSModLoader.getInstance().loadAllJSMods();
@@ -51,12 +48,12 @@ public class ForgeScript {
 	 * Invoke a method on every mod.
 	 */
 	public void invokeAll(String invoking, boolean ignoreNoSuchMethodExceptions, Object... args) throws ScriptException, NoSuchMethodException {
-		for (JSMod mod : jsMods) {
+		for (JSMod mod : JSModLoader.getInstance().jsMods) {
 			mod.invoke(invoking, ignoreNoSuchMethodExceptions, args);
 		}
 	}
 
 	public Object invoke(String invoking, int id, boolean ignoreNoSuchMethodExceptions, Object... args) throws ScriptException, NoSuchMethodException {
-		return jsMods.get(id).invoke(invoking, ignoreNoSuchMethodExceptions, args);
+		return JSModLoader.getInstance().jsMods.get(id).invoke(invoking, ignoreNoSuchMethodExceptions, args);
 	}
 }
