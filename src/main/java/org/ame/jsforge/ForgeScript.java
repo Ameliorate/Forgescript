@@ -29,7 +29,7 @@ public class ForgeScript {
 	public static final int API_VERSION = 0;
 
 	public static ScriptEngine engine;
-	private static ArrayList<JSMod> modContexts = new ArrayList<>();
+	private static ArrayList<JSMod> jsMods = new ArrayList<>();
 
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) throws ScriptException {
@@ -59,30 +59,14 @@ public class ForgeScript {
 	/**
 	 * Invoke a method on every mod.
 	 */
-	public void invokeAll(String function, boolean ignoreNoSuchMethodExceptions, Object... args) throws ScriptException, NoSuchMethodException {
-		for (JSMod mod : modContexts) {
-			engine.setContext(mod.context);
-			try {
-				((Invocable) engine).invokeFunction(function, args);
-			}
-			catch (NoSuchMethodException e) {
-				if (!ignoreNoSuchMethodExceptions) {
-					throw e;
-				}
-			}
+	public void invokeAll(String invoking, boolean ignoreNoSuchMethodExceptions, Object... args) throws ScriptException, NoSuchMethodException {
+		for (JSMod mod : jsMods) {
+			mod.invoke(invoking, ignoreNoSuchMethodExceptions, args);
 		}
 	}
 
-	public void invoke(String function, int id, boolean ignoreNoSuchMethodExceptions, Object... args) throws ScriptException, NoSuchMethodException {
-		engine.setContext(modContexts.get(id).context);
-		try {
-			((Invocable) engine).invokeFunction(function, args);
-		}
-		catch (NoSuchMethodException e) {
-			if (!ignoreNoSuchMethodExceptions) {
-				throw e;
-			}
-		}
+	public void invoke(String invoking, int id, boolean ignoreNoSuchMethodExceptions, Object... args) throws ScriptException, NoSuchMethodException {
+		jsMods.get(id).invoke(invoking, ignoreNoSuchMethodExceptions, args);
 	}
 
 	private void loadAllJSMods() throws ScriptException {
@@ -162,8 +146,8 @@ public class ForgeScript {
 		}
 		assert modInfo != null;	// Silences idea warning.
 		JSMod mod = new JSMod(engine.getContext(), 0, path, modInfo.get("API_Version").getAsInt(), modInfo.get("Mod_Name").getAsString(), modInfo.get("Mod_Version").getAsString());
-		modContexts.add(mod);
-		engine.eval("var modID = " + modContexts.indexOf(mod) + ";");
-		mod.modID = modContexts.indexOf(mod);
+		jsMods.add(mod);
+		engine.eval("var modID = " + jsMods.indexOf(mod) + ";");
+		mod.modID = jsMods.indexOf(mod);
 	}
 }
