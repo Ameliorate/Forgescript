@@ -1,7 +1,5 @@
 package org.ame.jsforge.internal;
 
-import org.ame.jsforge.internal.ForgeScript;
-
 import javax.script.Invocable;
 import javax.script.ScriptContext;
 import javax.script.ScriptException;
