@@ -16,7 +16,9 @@ import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.util.ForgeDirection;
 import org.ame.jsforge.EventBus;
 import org.ame.jsforge.internal.JSMod;
+import org.ame.jsforge.internal.UncheckedException;
 
+import javax.script.ScriptException;
 import java.util.Random;
 
 /**
@@ -614,7 +616,12 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 			return quantityDropedOnBreak;
 		}
 		else {
-			return (int) EventBus.call(owner, "getQuantityDropped", meta, fortune, random);
+			try {
+				return (int) EventBus.call(owner, "getQuantityDropped", meta, fortune, random);
+			}
+			catch (ScriptException e) {
+				throw new UncheckedException(e);
+			}
 		}
 	}
 

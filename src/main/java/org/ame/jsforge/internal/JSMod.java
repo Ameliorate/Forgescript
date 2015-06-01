@@ -26,14 +26,14 @@ public class JSMod {
 	public String name;
 	public String modVersion;
 
-	public Object invoke(String invoking, boolean ignoreNoSuchMethodExceptions, Object... args) throws NoSuchMethodException, ScriptException {
+	public Object invoke(String invoking, boolean ignoreNoSuchMethodExceptions, Object... args) throws ScriptException {
 		JSModLoader.getInstance().engine.setContext(context);
 		try {
 			return ((Invocable) JSModLoader.getInstance().engine).invokeFunction(invoking, args);
 		}
 		catch (NoSuchMethodException e) {
 			if (!ignoreNoSuchMethodExceptions) {
-				throw e;
+				throw new UncheckedException(e);
 			}
 			else {
 				return null;
