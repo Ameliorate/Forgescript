@@ -14,7 +14,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.util.ForgeDirection;
-import org.ame.jsforge.EventBus;
+import org.ame.jsforge.event.EventBus;
 import org.ame.jsforge.internal.JSMod;
 import org.ame.jsforge.internal.UncheckedException;
 
@@ -617,7 +617,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 		}
 		else {
 			try {
-				return (int) EventBus.call(owner, "getQuantityDropped", meta, fortune, random);
+				return (int) EventBus.getMainInstance().call(owner, "getQuantityDropped", meta, fortune, random);
 			}
 			catch (ScriptException e) {
 				throw new UncheckedException(e);
