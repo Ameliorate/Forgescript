@@ -14,11 +14,9 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.util.ForgeDirection;
-import org.ame.jsforge.event.EventBus;
+import org.ame.jsforge.event.InstanceEventBus;
 import org.ame.jsforge.internal.JSMod;
-import org.ame.jsforge.internal.UncheckedException;
 
-import javax.script.ScriptException;
 import java.util.Random;
 
 /**
@@ -51,14 +49,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 
 	 */
 
-
-
-	// CURRENTLY AT canEntityDestroy
-
-
-
-
-
+	public InstanceEventBus eventBus = new InstanceEventBus();
 
 	/**
 	 * The owner mod of this block. Basically who defined it.
@@ -616,12 +607,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 			return quantityDropedOnBreak;
 		}
 		else {
-			try {
-				return (int) EventBus.getMainInstance().call(owner, "getQuantityDropped", meta, fortune, random);
-			}
-			catch (ScriptException e) {
-				throw new UncheckedException(e);
-			}
+			return (int) eventBus.call("getQuantityDropped", meta, fortune, random); // Java classes can be safely assumed to be safe.
 		}
 	}
 
