@@ -1,1 +1,1 @@
-var Event = org.ame.jsforge.event.EventBus.getMainInstance();
+var Event = org.ame.jsforge.event.UniversalEventBus.getMainInstance();

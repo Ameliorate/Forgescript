@@ -10,16 +10,16 @@ import java.util.HashMap;
  * @author Amelorate
  * Handles events for mods.
  */
-public class EventBus {
-	private static EventBus mainInstance;
+public class UniversalEventBus {
+	private static UniversalEventBus mainInstance;
 	private HashMap<String, EventHandler[]> eventHandlers = new HashMap<>();
 
 	/**
-	 * Gets the main instance of the event bus. Do note that you can have instances elsewhere.
+	 * Gets the main instance of the event bus.
 	 */
-	public static EventBus getMainInstance() {
+	public static UniversalEventBus getMainInstance() {
 		if (mainInstance == null) {
-			mainInstance = new EventBus();
+			mainInstance = new UniversalEventBus();
 		}
 		return mainInstance;
 	}
