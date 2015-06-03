@@ -47,18 +47,14 @@ public class JSModLoader {
 		URL[] classPath = ((URLClassLoader)classLoader).getURLs();
 		for(URL url: classPath) {
 			if (url.getPath().contains("mods")) {
-				if (isValidModFile(url)) {
-					loadMod(url);
-				}
-				else {
-					System.out.println();
-				}
+				verifyModFile(url);
+				loadMod(url);
 			}
 		}
 		alreadyLoadedMods = true;
 	}
 
-	public boolean isValidModFile(URL path) {
+	public void verifyModFile(URL path) {
 		try {
 			File file = new File(path.toURI());
 			ZipFile modZipFile = new ZipFile(file);
@@ -68,14 +64,14 @@ public class JSModLoader {
 			JsonObject modInfoJson = (JsonObject) jsonParser.parse(new InputStreamReader(modInfoStream));
 
 			if (modInfoJson.get("API_Version").getAsInt() < ForgeScript.API_VERSION) {
-				System.out.println("Bad Version");
-				return false;
+				throw new InvalidModException("The mod `" + path.getFile() + "` is built for a version greater than The API version " + ForgeScript.API_VERSION + ". Please update Forgescript.");
 			}
-			return true;
 		}
-		catch (ZipException | ClassCastException | NullPointerException e) {
-			System.out.println("Not a js mod:" + path.getFile());
-			return false;
+		catch (ZipException e) {
+			throw new InvalidModException("The mod `" + path.getFile() + "` is made up of a malformed zip file. Please redownload the file or inform the mod author.", e);
+		}
+		catch (ClassCastException | NullPointerException e) {
+			throw new InvalidModException("The mod `" + path.getFile() + "'s modinfo.json is malformed. Please inform the mod author.", e); // This NullPointerException could come from elsewhere, but it is probably fine.
 		}
 		catch (URISyntaxException | IOException e) {
 			throw new AssertionError(e);
