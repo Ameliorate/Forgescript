@@ -1,12 +1,17 @@
-package org.ame.jsforge.internal;
+package org.ame.jsforge.internal.ModLoading;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.minecraft.launchwrapper.LaunchClassLoader;
+import org.ame.jsforge.internal.ForgeScript;
+import org.ame.jsforge.internal.JSMod;
+import org.apache.commons.compress.utils.IOUtils;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -124,5 +129,55 @@ public class JSModLoader {
 				throw new AssertionError(e);
 			}
 		}
+		resolveResources(zipFile, mod);
+	}
+
+	private void resolveResources(ZipFile file, JSMod mod) {
+		Enumeration files = file.entries();
+		while (files.hasMoreElements()) {
+			ZipEntry entry = (ZipEntry) files.nextElement();
+			if (entry.getName().equals("modinfo.json") && !entry.isDirectory()) {
+				try {
+					loadResource(file.getInputStream(entry), entry.getName(),  mod);
+				}
+				catch (IOException e) {
+					throw new AssertionError(e);
+				}
+			}
+			else if (entry.getName().startsWith("resources") && !entry.isDirectory()) {
+				try {
+					loadResource(file.getInputStream(entry), entry.getName(),  mod);
+				}
+				catch (IOException e) {
+					throw new AssertionError(e);
+				}
+			}
+		}
+	}
+
+	private void loadResource(InputStream resource, String name, JSMod mod) {
+		File resourceAsFile;
+		try {
+			resourceAsFile = File.createTempFile(name, null);
+		}
+		catch (IOException e) {
+			throw new AssertionError(e);
+		}
+		resourceAsFile.deleteOnExit();
+		try (FileOutputStream out = new FileOutputStream(resourceAsFile)) {
+			IOUtils.copy(resource, out);
+		}
+		catch (IOException e) {
+			throw new AssertionError(e);
+		}
+		URL url;
+		try {
+			url = resourceAsFile.toURI().toURL();
+		}
+		catch (MalformedURLException e) {
+			throw new AssertionError(e);
+		}
+		((LaunchClassLoader) this.getClass().getClassLoader()).addURL(url);
+		mod.resources.put(name, url);
 	}
 }

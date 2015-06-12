@@ -4,10 +4,9 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import org.ame.jsforge.internal.ModLoading.JSModLoader;
 
-import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-import java.util.ArrayList;
 
 /**
  * @author Amelorate

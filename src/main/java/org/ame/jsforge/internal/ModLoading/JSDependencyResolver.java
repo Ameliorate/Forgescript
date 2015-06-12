@@ -1,7 +1,8 @@
-package org.ame.jsforge.internal;
+package org.ame.jsforge.internal.ModLoading;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.ame.jsforge.internal.JSMod;
 
 import javax.script.ScriptException;
 import java.io.InputStreamReader;

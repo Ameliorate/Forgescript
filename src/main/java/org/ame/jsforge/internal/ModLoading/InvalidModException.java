@@ -1,4 +1,4 @@
-package org.ame.jsforge.internal;
+package org.ame.jsforge.internal.ModLoading;
 
 /**
  * @author Amelorate

@@ -1,7 +1,7 @@
 package org.ame.jsforge.event;
 
 import org.ame.jsforge.internal.JSMod;
-import org.ame.jsforge.internal.JSModLoader;
+import org.ame.jsforge.internal.ModLoading.JSModLoader;
 
 import javax.script.ScriptException;
 import java.util.HashMap;

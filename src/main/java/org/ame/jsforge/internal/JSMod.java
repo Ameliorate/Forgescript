@@ -1,9 +1,12 @@
 package org.ame.jsforge.internal;
 
+import org.ame.jsforge.internal.ModLoading.JSModLoader;
+
 import javax.script.Invocable;
 import javax.script.ScriptContext;
 import javax.script.ScriptException;
 import java.net.URL;
+import java.util.HashMap;
 
 /**
  * @author Amelorate
@@ -25,6 +28,7 @@ public class JSMod {
 	public int apiTarget;
 	public String name;
 	public String modVersion;
+	public HashMap<String, URL> resources = new HashMap<>();
 
 	public Object invoke(String invoking, boolean ignoreNoSuchMethodExceptions, Object... args) throws ScriptException {
 		JSModLoader.getInstance().engine.setContext(context);
