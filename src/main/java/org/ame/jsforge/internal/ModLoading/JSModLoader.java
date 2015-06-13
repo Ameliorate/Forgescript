@@ -52,18 +52,22 @@ public class JSModLoader {
 		URL[] classPath = ((URLClassLoader)classLoader).getURLs();
 		for(URL url: classPath) {
 			if (url.getPath().contains("mods")) {
-				verifyModFile(url);
-				loadMod(url);
+				if (verifyModFile(url)) {
+					loadMod(url);
+				}
 			}
 		}
 		alreadyLoadedMods = true;
 	}
 
-	public void verifyModFile(URL path) {
+	public boolean verifyModFile(URL path) {
 		try {
 			File file = new File(path.toURI());
 			ZipFile modZipFile = new ZipFile(file);
 			ZipEntry modInfo = modZipFile.getEntry("modinfo.json");
+			if (modInfo == null) {
+				return false;
+			}
 			InputStream modInfoStream = modZipFile.getInputStream(modInfo);
 			JsonParser jsonParser = new JsonParser();
 			JsonObject modInfoJson = (JsonObject) jsonParser.parse(new InputStreamReader(modInfoStream));
@@ -81,10 +85,12 @@ public class JSModLoader {
 		catch (URISyntaxException | IOException e) {
 			throw new AssertionError(e);
 		}
+		return true;
 	}
 
 	public void loadMod(URL path) throws ScriptException {
-		engine = new ScriptEngineManager().getEngineByName("nashorn");	// I probably need a better way to reset the context.
+		System.out.println(path);
+		engine = new ScriptEngineManager(null).getEngineByName("nashorn");	// I probably need a better way to reset the context.
 		Reader api = JSDependencyResolver.getInstance().resolveToReader("main");
 		engine.eval(api);
 		engine.eval("var apiVersion = " + ForgeScript.API_VERSION + ";");
@@ -115,7 +121,13 @@ public class JSModLoader {
 			}
 		}
 		assert modInfo != null;	// Silences idea warning.
-		JSMod mod = new JSMod(engine.getContext(), 0, path, modInfo.get("API_Version").getAsInt(), modInfo.get("Mod_Name").getAsString(), modInfo.get("Mod_Version").getAsString());
+		JSMod mod;
+		try {
+			mod = new JSMod(engine.getContext(), 0, path, modInfo.get("API_Version").getAsInt(), modInfo.get("Mod_Name").getAsString(), modInfo.get("Mod_Version").getAsString());
+		}
+		catch (NullPointerException e) {
+			throw new InvalidModException("The mod " + modInfo.get("Mod_Name") + "has a invalid modinfo.json file: " + modInfo, e);
+		}
 		jsMods.add(mod);
 		engine.eval("var modID = " + jsMods.indexOf(mod) + ";");
 		mod.modID = jsMods.indexOf(mod);
