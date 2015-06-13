@@ -16,7 +16,9 @@ import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.util.ForgeDirection;
 import org.ame.jsforge.event.InstanceEventBus;
 import org.ame.jsforge.internal.JSMod;
+import org.ame.jsforge.internal.ModLoading.JSModLoader;
 
+import java.lang.reflect.Field;
 import java.util.Random;
 
 /**
@@ -24,9 +26,12 @@ import java.util.Random;
  * Wraps all block fuctions in a easy to use way for use in javascript. All backwards compatable methods are affixed with "Safe"
  */
 public class JSBlockWrapper extends Block {		// Expect lots of switching over enums for compatability.
-	public JSBlockWrapper(Material material, JSMod owner) {
-		super(material);
-		this.owner = owner;
+	/**
+	 * @param ownerID modID if you are in JS space.
+	 */
+	public JSBlockWrapper(int ownerID) {
+		super(Material.air);
+		owner = JSModLoader.getInstance().jsMods.get(ownerID);
 	}
 
 	/*
@@ -261,6 +266,17 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	 */
 	public int expDrop = 0;
 
+
+	public void setMaterialSafe(MaterialWrapper material) {
+		try {
+			Field firstNameField = this.getClass().getDeclaredField("blockMaterial");
+			firstNameField.setAccessible(true);
+			firstNameField.set(this, material.toMaterial());
+		}
+		catch (NoSuchFieldException | IllegalAccessException e) {
+			throw new AssertionError(e);
+		}
+	}
 
 	public void setCreativeTabSafe(CreativeTabsForgeScript tab) {
 		setCreativeTab(CreativeTabsForgeScript.translate(tab));
