@@ -20,6 +20,7 @@ import org.ame.jsforge.event.InstanceEventBus;
 import org.ame.jsforge.internal.ForgeScript;
 import org.ame.jsforge.internal.JSMod;
 import org.ame.jsforge.internal.ModLoading.JSModLoader;
+import org.ame.jsforge.internal.NotImplemented;
 
 import java.lang.reflect.Field;
 import java.util.Random;
@@ -105,7 +106,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	public boolean canProvideRedstonePower = false;
 
 	/**
-	 * The localised name of this block. By default it uses the localised registry, of if you use that you don't need to set this.
+	 * The localised name of this block. Basically human readable text. In english.
 	 */
 	public String localisedName = null;
 
@@ -117,11 +118,13 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	/**
 	 * Call the javascript function canDropFromExplosion on an explosion if any logic needs done. This overrides canDropFromExplosion.
 	 */
+	@NotImplemented
 	public boolean callCanDropFromExplosionOnExplosion = false;
 
 	/**
 	 * If this outputs anything to comparators.
 	 */
+	@NotImplemented
 	public boolean hasComparatorInputOverride = false;
 
 	/**
@@ -132,6 +135,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	/**
 	 * To call js space when checking if the block is a ladder.
 	 */
+	@NotImplemented
 	public boolean callIsLadderOnIsLadder = false;
 
 	/**
@@ -147,6 +151,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	/**
 	 * Call to JS space when checking if the block is burning.
 	 */
+	@NotImplemented
 	public boolean callIsBurning = false;
 
 	/**
@@ -162,6 +167,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	/**
 	 * Call JS space on isAir.
 	 */
+	@NotImplemented
 	public boolean callIsAir = false;
 
 	/**
@@ -177,6 +183,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	/**
 	 * To call JS space if the block is harvestable.
 	 */
+	@NotImplemented
 	public boolean callIsHarvestable = false;
 
 	/**
@@ -187,6 +194,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	/**
 	 * To call JS space when getting flammability.
 	 */
+	@NotImplemented
 	public boolean callGetFlammability = false;
 
 	/**
@@ -197,6 +205,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	/**
 	 * To call JS space when getting fire spread speed.
 	 */
+	@NotImplemented
 	public boolean callGetFireSpreadSpeed = false;
 
 	/**
@@ -207,6 +216,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	/**
 	 * Call JS space when determining if this is a source of fire?
 	 */
+	@NotImplemented
 	public boolean callIsFireSource = false;
 
 	/**
@@ -217,6 +227,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	/**
 	 * Call JS when determining how many things to drop on break?
 	 */
+	@NotImplemented
 	public boolean callQuantityDropped = false;
 
 	/**
@@ -252,6 +263,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	/**
 	 * Call JS space when checking if it is wet.
 	 */
+	@NotImplemented
 	public boolean callIsFertile = false;
 
 	/**
@@ -267,6 +279,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	/**
 	 * The amount of exp the block drops when broken.
 	 */
+	@NotImplemented
 	public int expDrop = 0;
 
 	private String unlocalizedName = null;
@@ -304,10 +317,12 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 		setBlockUnbreakable();
 	}
 
+	@NotImplemented
 	public void setTickRandomlySafe(boolean tickRandomly) {
 		setTickRandomly(tickRandomly);
 	}
 
+	@NotImplemented
 	public void setBlockTextureSafe(String textureName) {
 		setBlockTextureName(ForgeScript.MODID + ":" + owner.name + "_" + textureName);
 	}
