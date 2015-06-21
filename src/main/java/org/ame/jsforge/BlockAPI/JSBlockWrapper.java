@@ -1,5 +1,7 @@
 package org.ame.jsforge.blockapi;
 
+import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -15,6 +17,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.util.ForgeDirection;
 import org.ame.jsforge.event.InstanceEventBus;
+import org.ame.jsforge.internal.ForgeScript;
 import org.ame.jsforge.internal.JSMod;
 import org.ame.jsforge.internal.ModLoading.JSModLoader;
 
@@ -30,7 +33,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	 * @param ownerID modID if you are in JS space.
 	 */
 	public JSBlockWrapper(int ownerID) {
-		super(Material.air);
+		super(Material.rock);
 		owner = JSModLoader.getInstance().jsMods.get(ownerID);
 	}
 
@@ -266,6 +269,8 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	 */
 	public int expDrop = 0;
 
+	private String unlocalizedName = null;
+
 
 	public void setMaterialSafe(MaterialWrapper material) {
 		try {
@@ -283,7 +288,8 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	}
 
 	public void setBlockUnlocalisedNameSafe(String name) {
-		setBlockName(name);
+		unlocalizedName = name;
+		setBlockName(ForgeScript.MODID + "_" + owner.name + "_" + name);
 	}
 
 	public void setBlockBoundsSafe(float x1, float x2, float y1, float y2, float z1, float z2) {
@@ -303,7 +309,16 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 	}
 
 	public void setBlockTextureSafe(String textureName) {
-		setBlockTextureName(textureName);
+		setBlockTextureName(ForgeScript.MODID + ":" + owner.name + "_" + textureName);
+	}
+
+	/**
+	 * Puts this block in the relevant registries. Only call this during preinit or blockinit.
+	 */
+	public void registerSafe() {
+		GameRegistry.registerBlock(this, unlocalizedName);
+		//noinspection deprecation
+		LanguageRegistry.instance().addNameForObject(this, "en_US", localisedName);	// I'm not sure of the english language string
 	}
 
 	@Override
@@ -680,6 +695,7 @@ public class JSBlockWrapper extends Block {		// Expect lots of switching over en
 
 	@Override
 	public int getExpDrop(IBlockAccess world, int metadata, int fortune) {
+		System.out.println("EXPDROP:" + expDrop);
 		return expDrop;
 	}
 }
