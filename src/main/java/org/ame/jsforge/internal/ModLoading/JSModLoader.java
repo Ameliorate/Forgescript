@@ -158,7 +158,8 @@ public class JSModLoader {
 			}
 			else if (entry.getName().startsWith("resources") && !entry.isDirectory()) {
 				try {
-					loadResource(file.getInputStream(entry), entry.getName(),  mod);
+					//											\/ Gets only the name of the resource, without directories. However now resources can't have folders.
+					loadResource(file.getInputStream(entry), entry.getName().split("/")[1],  mod);
 				}
 				catch (IOException e) {
 					throw new AssertionError(e);
@@ -168,15 +169,36 @@ public class JSModLoader {
 	}
 
 	private void loadResource(InputStream resource, String name, JSMod mod) {
+		URL dummy = this.getClass().getClassLoader().getResource("dummy");
+		assert dummy != null;	// Science IDE complaining.
+		File dummyFile;
+		try {
+			dummyFile = new File(dummy.toURI());
+		}
+		catch (URISyntaxException e) {
+			throw new AssertionError(e);
+		}
+		String dest = "file:///" + dummyFile.getParentFile().getPath() + "/" + mod.name + "_" + name;
+		dest = dest.replace(" ", "%20");
+		System.out.println(dest);
+
+		URL destURL;
+		try {
+			destURL = new URL(dest);
+		}
+		catch (MalformedURLException e) {	// Okay I'm slightly annoyed at checked exceptions now.
+			throw new AssertionError(e);
+		}
 		File resourceAsFile;
 		try {
-			resourceAsFile = File.createTempFile(name, null);
+			resourceAsFile = new File(destURL.toURI());
 		}
-		catch (IOException e) {
+		catch (URISyntaxException e) {
 			throw new AssertionError(e);
 		}
 		resourceAsFile.deleteOnExit();
-		try (FileOutputStream out = new FileOutputStream(resourceAsFile)) {
+		try {
+			FileOutputStream out = new FileOutputStream(resourceAsFile);
 			IOUtils.copy(resource, out);
 		}
 		catch (IOException e) {
