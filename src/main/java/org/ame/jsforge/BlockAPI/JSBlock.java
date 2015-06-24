@@ -29,11 +29,11 @@ import java.util.Random;
  * @author Amelorate
  * Wraps all block fuctions in a easy to use way for use in javascript. All backwards compatable methods are affixed with "Safe"
  */
-public class JSBlockWrapper extends Block {		// Expect lots of switching over enums for compatability.
+public class JSBlock extends Block {		// Expect lots of switching over enums for compatability.
 	/**
 	 * @param ownerID modID if you are in JS space.
 	 */
-	public JSBlockWrapper(int ownerID) {
+	public JSBlock(int ownerID) {
 		super(Material.rock);
 		owner = JSModLoader.getInstance().jsMods.get(ownerID);
 	}
