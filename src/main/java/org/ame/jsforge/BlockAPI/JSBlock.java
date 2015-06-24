@@ -305,8 +305,8 @@ public class JSBlock extends Block {		// Expect lots of switching over enums for
 		setBlockName(ForgeScript.MODID + "_" + owner.name + "_" + name);
 	}
 
-	public void setBlockBoundsSafe(float x1, float x2, float y1, float y2, float z1, float z2) {
-		setBlockBounds(x1, y1, z1, x2, y2, z2);
+	public void setBlockBoundsSafe(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+		setBlockBounds(minX, minY, minZ, maxX, maxY, maxZ);
 	}
 
 	public void setHardnessSafe(float hardness) {
